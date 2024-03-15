@@ -1,9 +1,42 @@
+import React, { useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import React from "react";
 import Avatar from "react-avatar";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  User,
+} from "firebase/auth";
+import { auth } from "../../Firebase/firebaseConfig";
 const utilize_logo = "/assets/utilize_logo.jfif";
 
 const Header = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const provider = await new GoogleAuthProvider();
+      return signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <header>
       <div className="flex flex-col md:flex-row items-center md:pl-16 md:pr-10 md:h-20 bg-white border-b-2">
@@ -30,14 +63,30 @@ const Header = () => {
               Search
             </button>
           </form>
-
-          <Avatar
-            name="Abhay Singh"
-            round
-            size="50"
-            color="#0055d1"
-            className="md:mt-0 hidden md:flex"
-          />
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Avatar
+                src={user.photoURL ?? ""}
+                round
+                size="40"
+                className="cursor-pointer"
+                onClick={handleSignOut}
+              />
+              <button
+                onClick={handleSignOut}
+                className="text-gray-500 font-bold"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGoogleSignIn}
+              className="text-gray-500 font-bold"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </header>
