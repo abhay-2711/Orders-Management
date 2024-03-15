@@ -19,3 +19,8 @@ export interface Order {
     quantity: number;
     order_value: number;
   }
+
+  interface UserState {
+    user: User | null;
+  }
+  

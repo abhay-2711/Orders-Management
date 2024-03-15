@@ -8,10 +8,13 @@ import {
   User,
 } from "firebase/auth";
 import { auth } from "../../Firebase/firebaseConfig";
+import { useDispatch } from "react-redux";
+import { login, logout } from "../../store/userSlice";
 const utilize_logo = "/assets/utilize_logo.jfif";
 
 const Header = () => {
   const [user, setUser] = useState<User | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -22,8 +25,9 @@ const Header = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const provider = await new GoogleAuthProvider();
-      return signInWithPopup(auth, provider);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      dispatch(login(result.user));
     } catch (error) {
       console.error("Error signing in with Google:", error);
     }
@@ -32,6 +36,7 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      dispatch(logout());
     } catch (error) {
       console.error("Error signing out:", error);
     }

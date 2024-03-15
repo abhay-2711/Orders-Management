@@ -1,4 +1,6 @@
-export const Data = [
+import { Order } from '../type'; // Import the 'Order' type from the appropriate module
+
+export const Data: Order[] = [
   {
     "id": "5e2940fdca9da1f010246d41",
     "customer_name": "Tillman Parker",
