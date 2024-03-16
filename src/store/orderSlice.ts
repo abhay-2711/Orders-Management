@@ -21,7 +21,7 @@ export const orderSlice = createSlice({
                 (order) => order.id !== id
             );
         },
-        editOrder: (state, action) => {
+        updateOrder: (state, action) => {
             const index = state.orders.findIndex(
                 (order) => order.id === action.payload.id
             );
@@ -30,6 +30,6 @@ export const orderSlice = createSlice({
     },
 });
 
-export const { addOrder, deleteOrder, editOrder } = orderSlice.actions;
+export const { addOrder, deleteOrder, updateOrder } = orderSlice.actions;
 
 export default orderSlice.reducer;

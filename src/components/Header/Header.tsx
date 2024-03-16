@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import Avatar from "react-avatar";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  User,
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { auth } from "../../Firebase/firebaseConfig";
 import { useDispatch } from "react-redux";
 import { login, logout } from "../../store/userSlice";
+import { useSelector } from "react-redux";
+import { UserState } from "../../type";
+import { ToastContainer, toast } from "react-toastify";
 const utilize_logo = "/assets/utilize_logo.jfif";
 
-const Header = () => {
-  const [user, setUser] = useState<User | null>(null);
+const Header = ({ handleSearch }: { handleSearch: (searchTerm: string) => void }) => {
+  const user = useSelector((state: UserState) => state.user.user);
   const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
+      if (user) dispatch(login(user));
+      else dispatch(logout());
     });
     return () => unsubscribe();
-  }, []);
+  }, [dispatch]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -29,7 +29,7 @@ const Header = () => {
       const result = await signInWithPopup(auth, provider);
       dispatch(login(result.user));
     } catch (error) {
-      console.error("Error signing in with Google:", error);
+      toast.error("Error signing in with Google");
     }
   };
 
@@ -38,8 +38,13 @@ const Header = () => {
       await signOut(auth);
       dispatch(logout());
     } catch (error) {
-      console.error("Error signing out:", error);
+      toast.error("Error signing out");
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSearch(searchTerm);
   };
 
   return (
@@ -57,12 +62,17 @@ const Header = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center md:space-y-0 md:space-x-5 flex-1 justify-end w-full gap-5">
-          <form className="sm:flex items-center space-x-5 bg-white rounded-md p-1 pl-5 shadow-md flex-1 md:flex-initial hidden">
+          <form
+            onSubmit={handleSubmit}
+            className="sm:flex items-center space-x-5 bg-white rounded-md p-1 pl-5 shadow-md flex-1 md:flex-initial hidden"
+          >
             <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
             <input
               type="text"
               placeholder="Search"
               className="flex-1 outline-none p-1 md:p-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
             <button type="submit" hidden>
               Search
@@ -94,6 +104,7 @@ const Header = () => {
           )}
         </div>
       </div>
+      <ToastContainer theme="dark" />
     </header>
   );
 };
